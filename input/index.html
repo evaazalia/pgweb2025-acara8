@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Input</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #c3ecf9, #f9c3e3);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Poppins", sans-serif;
+    }
+
+    .card {
+      border: none;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      background: #fff;
+      padding: 2rem;
+      width: 400px;
+    }
+
+    .card h2 {
+      text-align: center;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: #444;
+    }
+
+    .form-label {
+      font-weight: 500;
+    }
+
+    .btn-submit {
+      background: linear-gradient(90deg, #ff7eb3, #ff758c);
+      border: none;
+      width: 100%;
+      color: white;
+      font-weight: 600;
+      padding: 10px;
+      border-radius: 30px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-submit:hover {
+      background: linear-gradient(90deg, #ff758c, #ff7eb3);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 118, 136, 0.4);
+    }
+
+    #informasi {
+      text-align: center;
+      color: red;
+      margin-top: 10px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>📝 Form Input</h2>
+    <form action="input.php" onsubmit="return validateForm()" method="POST">
+
+      <div class="mb-3">
+        <label for="kec" class="form-label">Kecamatan</label>
+        <input type="text" class="form-control" id="kec" name="kecamatan" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="long" class="form-label">Longitude</label>
+        <input type="text" class="form-control" id="long" name="longitude" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="lat" class="form-label">Latitude</label>
+        <input type="text" class="form-control" id="lat" name="latitude" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="luas" class="form-label">Luas</label>
+        <input type="text" class="form-control" id="luas" name="luas" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="jml_ppdk" class="form-label">Jumlah Penduduk</label>
+        <input type="text" class="form-control" id="jml_ppdk" name="jumlah_penduduk" required>
+      </div>
+
+      <button type="submit" class="btn-submit">Submit</button>
+    </form>
+
+    <p id="informasi"></p>
+  </div>
+
+  <script>
+    function validateForm() {
+      let luas = document.getElementById("luas").value;
+      let text = "";
+      if (isNaN(luas) || luas < 1) {
+        text = "⚠️ Data luas harus berupa angka dan tidak boleh bernilai nol!";
+        document.getElementById("informasi").innerHTML = text;
+        return false; // stop form submission
+      }
+      document.getElementById("informasi").innerHTML = "";
+      return true;
+    }
+  </script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
