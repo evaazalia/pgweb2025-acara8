@@ -7,6 +7,8 @@
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
     <style>
         body {
@@ -14,8 +16,8 @@
             min-height: 100vh;
             font-family: "Poppins", sans-serif;
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
+            flex-direction: column;
+            align-items: center;
             padding: 50px 0;
         }
 
@@ -26,6 +28,7 @@
             padding: 30px 40px;
             max-width: 900px;
             width: 90%;
+            margin-bottom: 30px;
         }
 
         h2 {
@@ -43,7 +46,6 @@
         .btn-custom {
             background: linear-gradient(90deg, #ff7eb3, #ff758c);
             border: none;
-            width: auto;
             color: white;
             font-weight: 600;
             padding: 10px 25px;
@@ -63,6 +65,29 @@
             border-radius: 15px;
             font-weight: 500;
         }
+
+        /* Kotak khusus peta */
+        .map-container {
+            background: rgba(173, 216, 230, 0.4);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 20px;
+            width: 90%;
+            max-width: 900px;
+        }
+
+        #map {
+            height: 400px;
+            border-radius: 15px;
+        }
+
+        .map-title {
+            text-align: center;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -71,7 +96,6 @@
     <h2>📋 Data Kecamatan</h2>
 
     <?php
-    // Tampilkan pesan hasil input
     if (isset($_GET['status']) && isset($_GET['message'])) {
         $status = $_GET['status'];
         $message = $_GET['message'];
@@ -79,20 +103,15 @@
         echo "<div class='alert $alertClass text-center fade show' role='alert'>$message</div>";
     }
 
-    // Koneksi ke database
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "lat8";
-    $conn = new mysqli($servername, $username, $password, $dbname);
-
-    if ($conn->connect_error){
+    $conn = new mysqli("localhost", "root", "", "lat8");
+    if ($conn->connect_error) {
         die("<div class='alert alert-danger text-center'>Koneksi gagal: " . $conn->connect_error . "</div>");
     }
 
     $sql = "SELECT * FROM data_kecamatan";
     $result = $conn->query($sql);
 
+    $data = [];
     if ($result->num_rows > 0) {
         echo "<div class='table-responsive'>";
         echo "<table class='table table-bordered table-hover text-center align-middle'>";
@@ -104,10 +123,12 @@
                     <th>Latitude</th>
                     <th>Luas</th>
                     <th>Jumlah Penduduk</th>
+                    <th colspan='2'>Aksi</th>
                 </tr>
               </thead>
               <tbody>";
         while ($row = $result->fetch_assoc()) {
+            $data[] = $row;
             echo "<tr>
                     <td>{$row['id']}</td>
                     <td>{$row['kecamatan']}</td>
@@ -115,34 +136,53 @@
                     <td>{$row['latitude']}</td>
                     <td>{$row['luas']}</td>
                     <td>{$row['jumlah_penduduk']}</td>
+                    <td><a href='delete.php?id={$row["id"]}'>hapus</a></td>
+                    <td><a href='edit/index.php?id={$row["id"]}'>edit</a></td>
                   </tr>";
         }
         echo "</tbody></table></div>";
     } else {
         echo "<div class='alert alert-warning text-center'>Belum ada data kecamatan.</div>";
     }
-
     $conn->close();
     ?>
 
-    <!-- Tombol Tambah Data -->
     <div class="text-center mt-4">
-        <a href="input/index.html" class="btn-custom shadow-sm">➕ Tambah Data Baru</a>
+        <a href="input/index.html" class="btn-custom shadow-sm me-2">➕ Tambah Data Baru</a>
+        <a href="leafletjs.php" class="btn-custom shadow-sm">🌍 Lihat Peta Full</a>
     </div>
+</div>
+
+<!-- Kotak Peta di luar container -->
+<div class="map-container">
+    <h4 class="map-title">🗺️ Peta Sebaran Kecamatan Sleman</h4>
+    <div id="map"></div>
 </div>
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<!-- Script untuk fade-out alert otomatis -->
 <script>
-    const alert = document.querySelector('.alert');
-    if (alert) {
-        setTimeout(() => {
-            alert.classList.remove('show');
-            alert.classList.add('fade');
-        }, 3000); // hilang setelah 3 detik
-    }
+    const data = <?php echo json_encode($data); ?>;
+    const map = L.map('map').setView([-7.75, 110.35], 11);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    data.forEach(function(item) {
+        if (item.latitude && item.longitude) {
+            const marker = L.marker([item.latitude, item.longitude]).addTo(map);
+            marker.bindPopup(`
+                <b>${item.kecamatan}</b><br>
+                Luas: ${item.luas} km²<br>
+                Penduduk: ${item.jumlah_penduduk}
+            `);
+        }
+    });
 </script>
 
 </body>
